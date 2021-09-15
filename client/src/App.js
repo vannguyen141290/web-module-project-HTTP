@@ -8,16 +8,19 @@ import MovieHeader from './components/MovieHeader';
 
 import EditMovieForm from './components/EditMovieForm';
 import FavoriteMovieList from './components/FavoriteMovieList';
+import AddMovieForm from "./components/AddMovieForm";
 
 import axios from 'axios';
 
 const App = (props) => {
   const [movies, setMovies] = useState([]);
   const [favoriteMovies, setFavoriteMovies] = useState([]);
+  const [isAddedToFavorite, setIsAddedToFavorite] = useState(false);
 
-  useEffect(()=>{
+  useEffect(() => {
     axios.get('http://localhost:5000/api/movies')
       .then(res => {
+        console.log(res.data);
         setMovies(res.data);
       })
       .catch(err => {
@@ -25,39 +28,56 @@ const App = (props) => {
       });
   }, []);
 
-  const deleteMovie = (id)=> {
+
+  const deleteMovie = (id) => {
+    setMovies(movies.filter(item => item.id !== id))
   }
 
   const addToFavorites = (movie) => {
-    
+    if(favoriteMovies.find(item => item.id === movie.id)) {
+      setIsAddedToFavorite(true)
+    } else {
+      setFavoriteMovies([...favoriteMovies, movie]);
+    }
+
   }
+
+  console.log(favoriteMovies)
+
 
   return (
     <div>
       <nav className="navbar navbar-dark bg-dark">
-        <span className="navbar-brand" ><img width="40px" alt="" src="./Lambda-Logo-Red.png"/> HTTP / CRUD Module Project</span>
+        <span className="navbar-brand" ><img width="40px" alt="" src="./Lambda-Logo-Red.png" /> HTTP / CRUD Module Project</span>
       </nav>
 
       <div className="container">
-        <MovieHeader/>
+        <MovieHeader />
         <div className="row ">
-          <FavoriteMovieList favoriteMovies={favoriteMovies}/>
-        
+          <FavoriteMovieList favoriteMovies={favoriteMovies} />
+
           <Switch>
+
+          <Route path="/movies/add">
+              <AddMovieForm setMovies={setMovies}/>
+            </Route>
+
             <Route path="/movies/edit/:id">
+              <EditMovieForm setMovies={setMovies} />
             </Route>
 
             <Route path="/movies/:id">
-              <Movie/>
+              <Movie deleteMovie={deleteMovie} addToFavorites={addToFavorites} isAddedToFavorite={isAddedToFavorite}/>
             </Route>
 
             <Route path="/movies">
-              <MovieList movies={movies}/>
+              <MovieList movies={movies} />
             </Route>
 
             <Route path="/">
-              <Redirect to="/movies"/>
+              <Redirect to="/movies" />
             </Route>
+
           </Switch>
         </div>
       </div>
